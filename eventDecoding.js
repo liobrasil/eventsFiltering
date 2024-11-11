@@ -1,6 +1,6 @@
 const { ethers } = require("ethers");
 
-const swapEventAbi = [
+const swapEventAbiV2 = [
   {
     anonymous: false,
     inputs: [
@@ -41,6 +41,65 @@ const swapEventAbi = [
   },
 ];
 
+const swapEventAbiV3 = [
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "recipient",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "int256",
+        name: "amount0",
+        type: "int256",
+      },
+      {
+        indexed: false,
+        internalType: "int256",
+        name: "amount1",
+        type: "int256",
+      },
+      {
+        indexed: false,
+        internalType: "uint160",
+        name: "sqrtPriceX96",
+        type: "uint160",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "liquidity",
+        type: "uint128",
+      },
+      { indexed: false, internalType: "int24", name: "tick", type: "int24" },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "protocolFeesToken0",
+        type: "uint128",
+      },
+      {
+        indexed: false,
+        internalType: "uint128",
+        name: "protocolFeesToken1",
+        type: "uint128",
+      },
+    ],
+    name: "Swap",
+    type: "event",
+  },
+];
+
 const uniquePartialLogV2 = {
   address: "0xafa189508699700ff29539ef9aed4e6a2f3b6580",
   topics: [
@@ -52,21 +111,31 @@ const uniquePartialLogV2 = {
 };
 
 const uniquePartialLogV3 = {
-  address: "0x49aF5fB5de94C93Ee83Ad488Fe8CAb30b0ef35f2",
+  address: "0x247f51881d1e3ae0f759afb801413a6c948ef442",
   topics: [
-    "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+    "0x19b47279256b2a23a1665c810c8d55a1758940ee09377d4f8d26497a3577dc83",
+    "0x000000000000000000000000802b65b5d9016621e66003aed0b16615093f328b",
+    "0x000000000000000000000000802b65b5d9016621e66003aed0b16615093f328b",
   ],
-  data: "0x00000000000000000000000000000000000000000000000007f8f970955d7c37fffffffffffffffffffffffffffffffffffffffffffffffffcc6d904aa6f24db0000000000000000000000000000000000000000a2cb46e402ea5d36db724fdc00000000000000000000000000000000000000000000000721649bd70e7d0b2affffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdca1",
+  data: "0xffffffffffffffffffffffffffffffffffffffffffffffa1d07010a00eeefde9000000000000000000000000000000000000000000000000004bcee86cd08634000000000000000000000000000000000000000000e5ac1b42f8c9a798d3070c000000000000000000000000000000000000000000000b437e57bca81c6439cefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe46480000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a3f3163c1f",
 };
 
 async function decodeSwapEvent() {
   // Create an Interface instance with the event ABI
-  const iface = new ethers.Interface(swapEventAbi);
+  const ifaceV2 = new ethers.Interface(swapEventAbiV2);
+  const ifaceV3 = new ethers.Interface(swapEventAbiV3);
 
   // Decode the Swap event
-  const parsedLog = iface.parseLog(uniquePartialLogV3);
-  console.log("parsedLog", parsedLog);
+  const parsedLog = ifaceV3.parseLog(uniquePartialLogV3);
+  console.log("parsedLog keys: ", Object.keys(parsedLog));
+  console.log("parsedLog: ", parsedLog);
 
+  if (!parsedLog) {
+    console.log("Wrong ABI");
+    return;
+  }
+
+  // for V2
   if (parsedLog.name === "Swap") {
     console.log("Decoded Swap Event:");
     console.log("Sender:", parsedLog.args.sender);
@@ -77,4 +146,5 @@ async function decodeSwapEvent() {
     console.log("To:", parsedLog.args.to);
   }
 }
+
 decodeSwapEvent();
